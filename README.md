@@ -1,4 +1,8 @@
-# docker-wordpress-nginx
+# demp - docker, nginx, mysql, php
+
+
+
+
 
 A Dockerfile that installs the latest wordpress, nginx, php-apc and php-fpm.
 
