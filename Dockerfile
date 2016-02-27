@@ -19,11 +19,13 @@ RUN apt-get -y install php5-curl php5-gd php5-intl php-pear php5-imagick php5-im
 
 # mysql config
 RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
+# RUN mysqladmin -u root password mysecretpasswordgoeshere
+
 
 # nginx config
 RUN sed -i -e"s/keepalive_timeout\s*65/keepalive_timeout 2/" /etc/nginx/nginx.conf
 RUN sed -i -e"s/keepalive_timeout 2/keepalive_timeout 2;\n\tclient_max_body_size 100m/" /etc/nginx/nginx.conf
-RUN echo "daemon off;" >> /etc/nginx/nginx.conf
+RUN echo "daemon off;" >> /etc/nginx/nginx.conf 
 
 # php-fpm config
 RUN sed -i -e "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g" /etc/php5/fpm/php.ini
@@ -35,40 +37,35 @@ RUN find /etc/php5/cli/conf.d/ -name "*.ini" -exec sed -i -re 's/^(\s*)#(.*)/\1;
 
 # nginx site conf
 ADD ./nginx-site.conf /etc/nginx/sites-available/default
+RUN touch /var/log/php5-fpm.log
 
 # Supervisor Config
 RUN /usr/bin/easy_install supervisor
 RUN /usr/bin/easy_install supervisor-stdout
 ADD ./supervisord.conf /etc/supervisord.conf
 
-# Install Wordpress
-ADD https://wordpress.org/latest.tar.gz /usr/share/nginx/latest.tar.gz
-RUN cd /usr/share/nginx/ && tar xvf latest.tar.gz && rm latest.tar.gz
-RUN mv /usr/share/nginx/html/5* /usr/share/nginx/wordpress
-RUN rm -rf /usr/share/nginx/www
-RUN mv /usr/share/nginx/wordpress /usr/share/nginx/www
+# Wordpress Initialization and Startup Script
+RUN mkdir /usr/share/nginx/www
 RUN chown -R www-data:www-data /usr/share/nginx/www
 
-# Wordpress Initialization and Startup Script
-ADD ./start.sh /start.sh
-RUN chmod 755 /start.sh
-
 # Add WP-CLI 
-RUN curl -o /bin/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-COPY wp-su.sh /bin/wp
-RUN chmod +x /bin/wp-cli.phar
-RUN chmod +x /bin/wp
+RUN curl -o /usr/local/sbin/wp-cli.phar https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+COPY wp-su.sh /usr/local/sbin/wp
+RUN chmod +x /usr/local/sbin/wp-cli.phar
+RUN chmod +x /usr/local/sbin/wp
 
+# fix ubuntu ssh 
+RUN echo "    IdentityFile ~/.ssh/id_rsa" >> /etc/ssh/ssh_config
 
 # private expose
-EXPOSE 3306
+#EXPOSE 3306
 EXPOSE 80:80
 
 # volume for mysql database and wordpress install
 # VOLUME ["/var/lib/mysql", "/usr/share/nginx/www"]
-VOLUME ["/usr/share/nginx/www"]
+# VOLUME ["/usr/share/nginx/www"]
 
-ENV CODENVY_APP_BIND_DIR /usr/share/nginx/www
+ADD ./start.sh /usr/local/sbin/start.sh
+RUN chmod 755 /usr/local/sbin/start.sh
 
-
-CMD ["/bin/bash", "/start.sh"]
+CMD ["/bin/bash", "-c","/usr/local/sbin/start.sh"]

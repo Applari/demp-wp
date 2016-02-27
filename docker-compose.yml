@@ -1,0 +1,11 @@
+web:
+  build: .
+  expose:
+    - "80"
+    - "3306"
+  ports:
+    - "80:80"
+  volumes:
+    - ./code:/usr/share/nginx/www
+  env_file:
+    - ./variables.env
