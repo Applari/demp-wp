@@ -1,5 +1,5 @@
 web:
-  build: .
+  build: ./docker/.
   expose:
     - "80"
     - "3306"
