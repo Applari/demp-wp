@@ -28,7 +28,11 @@ echo -e "Wordpress not installed in /usr/share/nginx/www"
     echo -e "wordpress admin email:\t$WORDPRESS_ADMIN_EMAIL" >> ~/settings.txt
   DB_PREFIX=`pwgen -1 -A -0 5`
     echo -e "wordpress db prefix:\t$DB_PREFIX" >> ~/settings.txt
-  SITE_URL="http://docker.local"
+  
+  if [ -z "$SITE_URL" ]; then
+    SITE_URL=`ip route get 8.8.8.8 | awk '{print $NF; exit}'
+  fi
+  #SITE_URL="http://docker.local"
     echo -e "wordpress site url:\t$SITE_URL" >> ~/settings.txt
   SITE_TITLE="Applari WordPress"
     echo -e "wordpress site title:\t$SITE_TITLE" >> ~/settings.txt
