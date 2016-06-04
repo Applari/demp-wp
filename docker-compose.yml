@@ -6,6 +6,6 @@ web:
   ports:
     - "80:80"
   volumes:
-    - ./code:/usr/share/nginx/www
+    - ./code:/data/code
   env_file:
-    - ./variables.env
+    - variables.env
