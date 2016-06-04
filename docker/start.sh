@@ -30,7 +30,7 @@ echo -e "Wordpress not installed in /usr/share/nginx/www"
     echo -e "wordpress db prefix:\t$DB_PREFIX" >> ~/settings.txt
   
   if [ -z "$SITE_URL" ]; then
-    SITE_URL=`ip route get 8.8.8.8 | awk '{print $NF; exit}'
+    SITE_URL=`ip route get 8.8.8.8 | awk '{print $NF; exit}'`
   fi
   #SITE_URL="http://docker.local"
     echo -e "wordpress site url:\t$SITE_URL" >> ~/settings.txt
